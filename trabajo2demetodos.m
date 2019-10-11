@@ -342,3 +342,4 @@ dis = sqrt(pwlls2(1)^2+pwlls2(2)^2)
 dcord = [abs(pwlls2(1)),abs(pwlls2(2))]
 disp('Angulo en grados')
 angle = atan(pwlls2(2)/pwlls2(1))*360/(2*pi)
+%
