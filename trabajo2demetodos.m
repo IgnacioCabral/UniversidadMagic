@@ -51,14 +51,14 @@ Ttat =  7.14*10^(-9) ;         %Tiempo de respuesta del agente
 
 d(1) = 3*10^8 * ( Trtt1 - Ttat )/2;
 
-%----Hay que agregar un error aca que tiene el calculo de toa por interrupcion de ruido blanco
+
 
 %---------------------TOA2--------------------------------------------------------------------
 Trtt2 =  4*10^(-8);         %Tiempo de ida y vuelta en la medicion de distancia
 Ttat =  7.14*10^(-9) ;        %Tiempo de respuesta del agente 
 
 d(2) = 3*10^8 * ( Trtt2 - Ttat )/2;
-%----Hay que agregar un error aca que tiene el calculo de toa por interrupcion de ruido blanco
+
 
 %-----------------------Rss1-------------------------------------------------------------------
 %
@@ -176,20 +176,22 @@ angle = atan(plls1(2)/plls1(1))*360/(2*pi)
         k(i,1) = [ x(i)^2 + y(i)^2 ];
         b2(i,1) = d(1)^2 - d(i)^2 - kr - k(i,1);
     end 
-
+    sparse(A2);
+    sparse(b2);
+    sparse(k);
 %Ahora deberia hacer Aii * p = bii donde p tiene dos componentes, x e y
 %que seran las cordenadas
 
 Fsol = inv((A2'*A2))*A2'*b2; 
-plls1 = [Fsol(1), Fsol(2)]; %p de posicion
+plls2 = [Fsol(1), Fsol(2)]; %p de posicion
 
 
 disp('---------------------Red no hibrida LLS2---------------------------------')
 disp('Distancia en metros desde antena de referencia ubicada en (0,0)')
-dis = sqrt(plls1(1)^2+plls1(2)^2)
+dis = sqrt(plls2(1)^2+plls2(2)^2)
 dcord = [Fsol(1), Fsol(2)]
 disp('Angulo en grados')
-angle = atan(plls1(2)/plls1(1))*360/(2*pi)
+angle = atan(plls2(2)/plls2(1))*360/(2*pi)
 
 %Datos de antenas RSS
 d(4)=sqrt(50);d(3)=sqrt(50);
@@ -204,16 +206,81 @@ for i = 1:4
     b2(i,1) = d(1)^2 - d(i)^2 - kr - k(i,1);
 end 
 
+sparse(A2);
+sparse(b2);
+sparse(k);
+
 %Ahora deberia hacer Aii * p = bii donde p tiene dos componentes, x e y
 %que seran las cordenadas
 
 Fsol = inv((A2'*A2))*A2'*b2; 
-plls1 = [Fsol(1), Fsol(2)]; %p de posicion
+plls2 = [Fsol(1), Fsol(2)]; %p de posicion
 
 
 disp('---------------------Red hibrida LLS2---------------------------------')
 disp('Distancia en metros desde antena de referencia ubicada en (0,0)')
-dis = sqrt(plls1(1)^2+plls1(2)^2)
+dis = sqrt(plls2(1)^2+plls2(2)^2)
 dcord = [Fsol(1), Fsol(2)]
 disp('Angulo en grados')
-angle = atan(plls1(2)/plls1(1))*360/(2*pi)
+angle = atan(plls2(2)/plls2(1))*360/(2*pi)
+
+
+
+
+%--------------------------------------------------------------------------------
+%--------------------------------------------------------------------------------
+% =========                          WWL                                =========
+%--------------------------------------------------------------------------------
+%--------------------------------------------------------------------------------
+%
+%Cuando incluimos las varianzas en la medicion, utilizar el metodo de  WWL se 
+%lograria una ubicacion aun mas exacta, el paper nos menciona dos errores o varianzas
+%ocacionadas por ruido blanco que seran quienes influyan y si obtenemos estos
+%resultados es pocible mejorarlo al programa
+
+% sigue el metodo de la variable simbolica pero luego agrega una variable mas: 'C'
+%Tengo que calcular las varianzas:
+%las dejo 'supuestos' Acordarse de calcularlo
+var = [ 0.3 0.3 1.76 1.76 ];
+
+for i = 1:4
+    A3(i,1) = [ -2 * x(i) ];
+    A3(i,2) = [ -2 * y(i) ];
+    A3(i,3) = 1;
+    b3(i,1) = d(i)^2 - x(i)^2 - y(i)^2;
+
+
+    c3(i,i) = 4 * var(i)*d(i)^2; 
+end 
+
+sparse(A3);
+sparse(b3);
+sparse(c3);
+
+Fsol = inv((A3'*inv(c3)*A3))*A3'*inv(c3)*b3; %%%%%%%%%Marca
+
+%Aca copio las ecuaciones que propone el paper, no explica que son y no se muy bien
+
+G = [1 0; 0 1; 1 1];
+
+tam = length (A3(:,1)');
+unos = ones ( tam , 1);
+K = diag([2.*A3(:,1), 2.*A3(:,2), unos]);
+
+h = [ A3(:,1).^2, A3(:,2).^2, A3(:,3).^2 ]';
+
+Fi = K.*inv((A3'*inv(c3)*A3)).*K;
+%%%%%%%%%%%%%z me da NaN y mas de dos componentes, no encuentro el error, ayuda!!!!!
+z = inv((G'*inv(Fi)*G))*G'*inv(Fi)*h; %%%%%%Marca
+
+%Llegando al final a un resultado tal
+
+pwlls1 = [sign(Fsol(1)) * sqrt(abs( z(1)) ) , sign(Fsol(2))*sqrt(abs( z(2)) )];
+
+disp('---------------------Red hibrida WLLS1---------------------------------')
+disp('Distancia en metros desde antena de referencia ubicada en (0,0)')
+dis = sqrt(pwlls1(1)^2+pwlls1(2)^2)
+dcord = pwlls1
+disp('Angulo en grados')
+angle = atan(pwlls1(2)/pwlls1(1))*360/(2*pi)
+
