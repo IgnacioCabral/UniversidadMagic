@@ -1,173 +1,188 @@
 clear all
 clc
 
+warning ( 'off' )
+
 %Primero debo ingresar los datos que necesito
-%
 %
 %--------------Parte Hibrida------------------------------------------------------------------
 %Tenemos dos ecuaciones de distancia suponiendo que la red o las anclas son de tipo hibrido
-%es decir, tendremos 2 RSS y 2 TOA
+%ya que tendremos 2 RSS y 2 TOA
 %---------------------------------------------------------------------------------------------
-%Supongamos un ecenario de LxL en metros, de 4 antenas o anclas y en forma cuadrada como para
-%ubicarse mejor, de forma mas sencilla y utilizamos 4 para que la aproximacion sea la minima 
-%posible
+%Supongamos un ecenario de LxL en metros, de 4 antenas o anclas y en forma cuadrada
+%y utilizamos 4 para que la aproximacion sea la minima posible
 % 
-%   ANTENA RSS (0,L) ------------------- ANTENA RSS (L,L)
-%          -                                 -
-%          -                                 -     
-%          -                 AGENTE          -     
-%          -                                 -
-%   ANTENA TOA (0,0) ------------------- ANTENA TOA (L,0)
-%APARTADO GRAFICO - O VISUAL PARA ENTENDER LO QUE CALCULAMOS
+%   _ _                                                  _ _
+%  | ANTENA RSS (0,L) ------------------- ANTENA RSS (L,L)  |
+%  |        -                                 -             |      
+%  |        -                                 -             |
+%  |        -                 AGENTE          -             |
+%  |        -                                 -             |
+%  |        -                                 -             |
+%  | ANTENA TOA (0,0) ------------------- ANTENA TOA (L,0)  |
+%   - -                                                  - -
+
+%APARTADO GRAFICO / VISUAL PARA ENTENDER LO QUE CALCULAMOS
 imagen = imshow('grafico.bmp');
 clc
-%
+
 % El valor de L propuesto por el paper es de 10 metros
-    
 L=10;
 
-% Aclara que el agente se puede cambiar la ubicacion cada 2 metros
-% por lo tanto el cuadrado formado por las antenas sera de dividido en 5x5 cudriculas que seran
+% Aclara que el agente se puede cambiar la ubicación cada 2 metros
+% por lo tanto el cuadrado formado por las antenas será de dividido en 5x5 cudrículas que serán
 % las posibles ubicaciones
 % 
 % ---------------------------------------------------------------------------------------------- 
 % Ecuacion principal con la que vamos a trabajar: (una por cada antena que coloquemos generara
-% un radio, que cuya intersepcion sera nuestro objetivo)
+% un radio, que cuya intersección será nuestro objetivo)
 %
 % di = p - pi = ( ( x - xi )^2 + ( y - yi )^2 )^1/2
 %
-% Esta ecuacion no es lineal, por ende utilizaremos diferentes tecnicas de minimo cuadrado
-% para linealizar esta ecuacion y luego llegar a un valor aproximado
+% Esta ecuación no es lineal, por ende utilizaremos diferentes técnicas de mínimo cuadrado
+% para linealizar esta ecuación y luego llegar a un valor aproximado
 % 
-% xi y yi seran el centro de la circunferencia, es decir donde esta ubicada cada antena
+% xi y yi ser+an el centro de la circunferencia, es decir donde está ubicada cada antena
 
-%!!!!!!!!!!!!!!!!ACA EMPIEZA EL PROGRAMA EN SI!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+%!!!!!!!!!!!!!!!!ACA EMPIEZA EL PROGRAMA!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 
 % --------------------------------------------------------------------------------------------
 % Calculo de distancia por cada antena:
 % -------------------TOA1---------------------------------------------------------------------
-Trtt1 =  4*10^(-8);          %Tiempo de ida y vuelta en la medicion de distancia
-Ttat =  7.14*10^(-9) ;         %Tiempo de respuesta del agente 
+
+Trtt1 =  4*10^(-8);         
+%Tiempo de ida y vuelta en la medicion de distancia
+
+Ttat =  7.14*10^(-9) ;         
+%Tiempo de respuesta del agente 
 
 d(1) = 3*10^8 * ( Trtt1 - Ttat )/2;
 
 
-
 %---------------------TOA2--------------------------------------------------------------------
-Trtt2 =  4*10^(-8);         %Tiempo de ida y vuelta en la medicion de distancia
-Ttat =  7.14*10^(-9) ;        %Tiempo de respuesta del agente 
+
+Trtt2 =  4*10^(-8);         
+%Tiempo de ida y vuelta en la medicion de distancia
+
+Ttat =  7.14*10^(-9) ;       
+%Tiempo de respuesta del agente 
 
 d(2) = 3*10^8 * ( Trtt2 - Ttat )/2;
 
 
 %-----------------------Rss1-------------------------------------------------------------------
 %
-% Aca le voy a poner por el momento lo que dice el paper que mas o menos da un resultado de 10m
+% Acá le voy a poner por el momento lo que dice el paper que más o menos da un resultado de 10m
 %pero habria que calcular un di por medio de la potencia
+
 d(3)=sqrt(50);
 
 
 %-----------------------Rss2------------------------------------------------------------------
-% Aca le voy a poner por el momento lo que dice el paper que mas o menos da un resultado de 10m
-%pero habria que calcular un di por medio de la potencia
+% Acá le voy a poner por el momento lo que dice el paper que más o menos da un resultado de 10m
+%pero habría que calcular un di por medio de la potencia
+
 d(4)=sqrt(50);
 
 %---------------------------------------------------------------------------------------------
     
         
 
-%LUEGO TENGO QUE ARMAR LA MATRIZ Y APLICAR LOS METODOS
+%LUEGO TENGO QUE ARMAR LA MATRIZ Y APLICAR LOS MÉTODOS
 
 x = [ 0 L 0 L ];
 y = [ 0 0 L L ];
 
-% Primer metodo ---> Imponemos una variable ficticia "R" que remplazara a x^2+y^2
-% 
-% y ademas nos queda que F = [ x y R ]'
+%/////////////////////////////////////////////////////////////////////////////////////////////
+%---------------------------Primer método LLS2------------------------------------------------
+%\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+
+% Primer método ---> Imponemos una variable ficticia "R" que remplazará a
+% (x^2+y^2) y además nos queda que F = [ x y R ]'
 %
-% Entonces quedara la matriz Ai * F = bi
+% Entonces quedará la matriz Ai * F = bi
 
     for i = 1:4
-        A(i,1) = [ -2 * x(i) ];
-        A(i,2) = [ -2 * y(i) ];
-        A(i,3) = 1;
-        b(i,1) = d(i)^2 - x(i)^2 - y(i)^2;
+        A (i,1) = [ -2 * x(i) ];
+        A (i,2) = [ -2 * y(i) ];
+        A (i,3) = 1;
+        b (i,1) = d(i)^2 - x(i)^2 - y(i)^2;
     end 
 
 disp('------------------Red Hibrida LLS1----------------------------------')
 
-%Paso la matriz a sparce para ahorro de almasenamiento
+%Paso la matriz a sparce para ahorro de almacenamiento
 
     sparse(A);
     sparse(b);
 
-%Calculo directamente los minimos cuadrados a partir de la variable ficticia
-%Siendo F lo que nos linealiza el sistema para que podamos resolver, es
+%Calculo directamente los mínimos cuadrados a partir de la variable ficticia
+%Siendo F lo que nos linealizá el sistema para que podamos resolver, será
 %entonces nuestra variable a encontrar:
-%F tendra 3 componentes, 2 son las cordenadas, las primeras dos
+%F tendrá 3 componentes, 2 son las cordenadas, las primeras dos ( x , y )
 
     Fsol = inv((A'*A))*A'*b; 
     plls1 = [Fsol(1), Fsol(2)];
 
-disp('Distancia en metros desde antena de referencia ubicada en (0,0)')
-%Luego tomo la distancia como:
-dis = sqrt(plls1(1)^2+plls1(2)^2)
-dcord = [abs(Fsol(1)), abs(Fsol(2))]
-disp('Angulo en grados')
-angle = atan(plls1(2)/plls1(1))*360/(2*pi)
+disp('Distancia en metros desde antena de referencia ubicada en (0,0):')
+%Tomo la distancia como:
+dis = sqrt( plls1(1) ^ 2 + plls1(2) ^ 2 )
+dcord = [ abs( Fsol(1) ) , abs ( Fsol(2) ) ]
+disp('Ángulo en grados:')
+angle = atan ( plls1(2) / plls1(1) ) * 360 / ( 2 * pi )
 
 
-%Repetire el proceso para  ahora tener en cuenta 4 toa entonces remplazare las 2 que eran
+%Repetiré el proceso para  ahora tener en cuenta 4 toa entonces remplazaré las 2 que eran
 %rss por toa
 
     Trtt3 =  4*10^(-8); 
-    d(3) = 3*10^8 * ( Trtt3 - Ttat )/2;
+    d(3) = 3 * 10^8 * ( Trtt3 - Ttat ) / 2;
 
     Trtt4 =  4*10^(-8); 
-    d(4) = 3*10^8 * ( Trtt4 - Ttat )/2;
+    d(4) = 3 * 10^8 * ( Trtt4 - Ttat ) / 2;
 
 
     for i = 1:4
-        A(i,1) = [ -2 * x(i) ];
-        A(i,2) = [ -2 * y(i) ];
-        A(i,3) = 1;
-        b(i,1) = d(i)^2 - x(i)^2 - y(i)^2;
+        A (i,1) = [ -2 * x(i) ] ;
+        A (i,2) = [ -2 * y(i) ] ;
+        A (i,3) = 1;
+        b (i,1) = d(i) ^ 2 - x(i)^2 - y(i)^2 ;
     end 
 
 sparse(A);
 sparse(b);
 
-%Realizo un calculo propuesto por el paper para encontrar el valor de la
+%Realizo un cálculo propuesto por el paper para encontrar el valor de la
 %variable, que es despejar la variable
 
-Fsol = inv((A'*A))*A'*b; 
+Fsol = inv( ( A' * A) )* A' * b ; 
 
-%La primer componente de Fsol es la x y la segunda es ls Y
+%La primer componente de Fsol es la x y la segunda es la Y
 %por lo tanto:
 
 plls1 = [Fsol(1), Fsol(2)]; %p de posicion
 
-%--------------------------------------------------------------------------------------------
+
 %Luego tomo la distancia como:
 %
 disp('---------------------Red no hibrida LLS1---------------------------------')
 disp('Distancia en metros desde antena de referencia ubicada en (0,0)')
-dis = sqrt(plls1(1)^2+plls1(2)^2)
-dcord = [abs(Fsol(1)), abs(Fsol(2))]
-disp('Angulo en grados')
-angle = atan(plls1(2)/plls1(1))*360/(2*pi)
+dis = sqrt ( plls1(1)^2 + plls1(2) ^ 2 )
+dcord = [ abs ( Fsol(1) ) , abs( Fsol(2) ) ]
+disp('Ángulo en grados')
+angle = atan ( plls1(2) / plls1(1) ) * 360 / ( 2 * pi )
 
 
 
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%//////////////////////////////////////////////////////////////////////////////////////////////
 %---------------------------Segundo metodo LLS2------------------------------------------------
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 %
-%Para el segundo metodo nececitamos fijar alguna antena como referencia
-%EL paper nos propone 4 formas, para probar el metodo utilizo tomar una antena aleatoreamente
+%Para el segundo método nececitamos fijar alguna antena como referencia
+%EL paper nos propone 4 formas, para probar el método utilizo tomar una antena aleatoriamente
 %supongamos que esa va a ser la ubicada en (0,0)
 %
     xr = 0; yr= 0;
@@ -178,11 +193,11 @@ angle = atan(plls1(2)/plls1(1))*360/(2*pi)
         k(i,1) = [ x(i)^2 + y(i)^2 ];
         b2(i,1) = d(1)^2 - d(i)^2 - kr - k(i,1);
     end 
-    sparse(A2);
-    sparse(b2);
-    sparse(k);
-%Ahora deberia hacer Aii * p = bii donde p tiene dos componentes, x e y
-%que seran las cordenadas
+    sparse (A2);
+    sparse (b2);
+    sparse (k);
+%Ahora debería hacer Aii * p = bii donde p tiene dos componentes, x e y
+%que serán las cordenadas
 
 Fsol = inv((A2'*A2))*A2'*b2; 
 plls2 = [Fsol(1), Fsol(2)]; %p de posicion
@@ -190,13 +205,13 @@ plls2 = [Fsol(1), Fsol(2)]; %p de posicion
 
 disp('---------------------Red no hibrida LLS2---------------------------------')
 disp('Distancia en metros desde antena de referencia ubicada en (0,0)')
-dis = sqrt(plls2(1)^2+plls2(2)^2)
-dcord = [abs(Fsol(1)), abs(Fsol(2))]
-disp('Angulo en grados')
-angle = atan(plls2(2)/plls2(1))*360/(2*pi)
+dis = sqrt( plls2(1) ^ 2 + plls2(2) ^ 2 )
+dcord = [ abs( Fsol(1) ), abs( Fsol(2) ) ]
+disp('Ángulo en grados')
+angle = atan ( plls2(2) / plls2(1) ) * 360 / ( 2 * pi )
 
 %Datos de antenas RSS
-d(4)=sqrt(50);d(3)=sqrt(50);
+d(4) = sqrt(50);  d(3) = sqrt(50);
 
 %repito proceso
 xr = 0; yr= 0;
@@ -221,28 +236,26 @@ plls2 = [Fsol(1), Fsol(2)]; %p de posicion
 
 disp('---------------------Red hibrida LLS2---------------------------------')
 disp('Distancia en metros desde antena de referencia ubicada en (0,0)')
-dis = sqrt(plls2(1)^2+plls2(2)^2)
-dcord = [abs(Fsol(1)), abs(Fsol(2))]
+dis = sqrt( plls2(1) ^ 2 + plls2(2) ^ 2 )
+dcord = [ abs( Fsol(1) ) , abs( Fsol(2) ) ]
 disp('Angulo en grados')
-angle = atan(plls2(2)/plls2(1))*360/(2*pi)
+angle = atan ( plls2(2) / plls2(1) ) * 360 / (2 * pi)
 
 
 
 
-%--------------------------------------------------------------------------------
-%--------------------------------------------------------------------------------
-% =========                          WWL                                =========
-%--------------------------------------------------------------------------------
-%--------------------------------------------------------------------------------
+%//////////////////////////////////////////////////////////////////////////////////////////////
+%---------------------------Tercer método WLLS1------------------------------------------------
+%\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 %
-%Cuando incluimos las varianzas en la medicion, utilizar el metodo de  WWL se 
-%lograria una ubicacion aun mas exacta, el paper nos menciona dos errores o varianzas
-%ocacionadas por ruido blanco que seran quienes influyan y si obtenemos estos
-%resultados es pocible mejorarlo al programa
+%Cuando incluimos las varianzas en la medicion, utilizar el método de  WWL se 
+%lograría una ubicación aún más exacta, el paper nos menciona dos errores o varianzas
+%ocasionadas por ruido blanco que serán quienes influyan y si obtenemos estos
+%resultados es posible mejorarlo al programa
 
-% sigue el metodo de la variable simbolica pero luego agrega una variable mas: 'C'
+% Sigue el método de la variable simbólica pero luego agrega una variable más: 'C'
 %Tengo que calcular las varianzas:
-%las dejo 'supuestos' Acordarse de calcularlo
+%las dejo 'supuestas' debo acordarme de calcularlo
 var = [ 0.3 0.3 1.76 1.76 ];
 
 for i = 1:4
@@ -260,9 +273,9 @@ sparse(A3);
 sparse(b3);
 sparse(c3);
 
-Fsol = inv((A3'*inv(c3)*A3))*A3'*inv(c3)*b3; %%%%%%%%%Marca
+Fsol = inv ( ( A3' * inv(c3) * A3 ) ) * A3' * inv(c3) * b3; %%%%%%%%%Marca
 
-%Aca copio las ecuaciones que propone el paper, no explica que son y no se muy bien
+%Aá copio las ecuaciones que propone el paper, no explica qué son y no se muy bien
 
 G = [1 0; 0 1; 1 1];
 
@@ -270,18 +283,19 @@ K(1,1) = 2*Fsol(1);
 k(2,2) = 2*Fsol(2);
 k(3,3) = 1;
 
-h = [ Fsol(1)^2 , Fsol(2)^2, Fsol(3) ]';
+h = [ Fsol(1) ^ 2 , Fsol(2) ^ 2 , Fsol(3) ]';
 
 Fi = K*inv((A3'*inv(c3)*A3))*K;
-%%%%%%%%%%%%%z me da NaN y mas de dos componentes, no encuentro el error, ayuda!!!!!
-z = inv((G'*inv(Fi)*G))*G'*inv(Fi)*h; %%%%%%Marca
+
+z = inv((G'*inv(Fi)*G))*G'*inv(Fi)*h; 
 
 %Llegando al final a un resultado tal
 
-pwlls1 = [sign(Fsol(1)) * sqrt(abs( z(1)) ) , sign(Fsol(2))*sqrt(abs( z(2)) )];
+pwlls1 = [ sign ( Fsol(1) ) * sqrt ( abs( z(1) ) ) , sign ( Fsol(2) ) * sqrt ( abs ( z(2) ) ) ];
 
 disp('---------------------Red hibrida WLLS1---------------------------------')
 
+disp('Distancia en metros desde antena de referencia ubicada en (0,0)')
 dis = sqrt(pwlls1(1)^2+pwlls1(2)^2)
 dcord = [abs(pwlls1(1)),abs(pwlls1(2))]
 disp('Angulo en grados')
@@ -293,13 +307,13 @@ angle = atan(pwlls1(2)/pwlls1(1))*360/(2*pi)
 
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%----------------------------------------Ultimo metodo,  WLLS2-----------------------------
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%//////////////////////////////////////////////////////////////////////////////////////////
+%---------------------------------Ultimo metodo WLLS2--------------------------------------
+%\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 
 x = [ 0 L 0 L ];
 y = [ 0 0 L L ];
-% r = ( 0 , 0);
+% r = ( 0 , 0), coordenadas de la antena de referencia
 j=1;
 for i = 1:4
     
@@ -330,8 +344,8 @@ sparse(A4);
 sparse(b4);
 sparse(k);
 
-%Ahora deberia hacer Aii * p = bii donde p tiene dos componentes, x e y
-%que seran las cordenadas
+%Ahora debería hacer Aii * p = bii donde p tiene dos componentes, x e y
+%que serán las cordenadas
 
 Fsol = inv((A4'*inv(c4)*A4))*A4'*inv(c4)*b4; 
 pwlls2 = [Fsol(1), Fsol(2)]; %p de posicion
@@ -340,6 +354,8 @@ disp('---------------------Red hibrida WLLS2---------------------------------')
 disp('Distancia en metros desde antena de referencia ubicada en (0,0)')
 dis = sqrt(pwlls2(1)^2+pwlls2(2)^2)
 dcord = [abs(pwlls2(1)),abs(pwlls2(2))]
-disp('Angulo en grados')
+disp('Ángulo en grados')
 angle = atan(pwlls2(2)/pwlls2(1))*360/(2*pi)
-%
+
+
+warning ( 'on' )
