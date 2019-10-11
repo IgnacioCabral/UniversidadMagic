@@ -43,6 +43,7 @@ L=10;
 
 %!!!!!!!!!!!!!!!!ACA EMPIEZA EL PROGRAMA EN SI!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+
 % --------------------------------------------------------------------------------------------
 % Calculo de distancia por cada antena:
 % -------------------TOA1---------------------------------------------------------------------
@@ -73,7 +74,8 @@ d(3)=sqrt(50);
 d(4)=sqrt(50);
 
 %---------------------------------------------------------------------------------------------
-
+    
+        
 
 %LUEGO TENGO QUE ARMAR LA MATRIZ Y APLICAR LOS METODOS
 
@@ -111,7 +113,7 @@ disp('------------------Red Hibrida LLS1----------------------------------')
 disp('Distancia en metros desde antena de referencia ubicada en (0,0)')
 %Luego tomo la distancia como:
 dis = sqrt(plls1(1)^2+plls1(2)^2)
-dcord = [Fsol(1), Fsol(2)]
+dcord = [abs(Fsol(1)), abs(Fsol(2))]
 disp('Angulo en grados')
 angle = atan(plls1(2)/plls1(1))*360/(2*pi)
 
@@ -152,7 +154,7 @@ plls1 = [Fsol(1), Fsol(2)]; %p de posicion
 disp('---------------------Red no hibrida LLS1---------------------------------')
 disp('Distancia en metros desde antena de referencia ubicada en (0,0)')
 dis = sqrt(plls1(1)^2+plls1(2)^2)
-dcord = [Fsol(1), Fsol(2)]
+dcord = [abs(Fsol(1)), abs(Fsol(2))]
 disp('Angulo en grados')
 angle = atan(plls1(2)/plls1(1))*360/(2*pi)
 
@@ -189,7 +191,7 @@ plls2 = [Fsol(1), Fsol(2)]; %p de posicion
 disp('---------------------Red no hibrida LLS2---------------------------------')
 disp('Distancia en metros desde antena de referencia ubicada en (0,0)')
 dis = sqrt(plls2(1)^2+plls2(2)^2)
-dcord = [Fsol(1), Fsol(2)]
+dcord = [abs(Fsol(1)), abs(Fsol(2))]
 disp('Angulo en grados')
 angle = atan(plls2(2)/plls2(1))*360/(2*pi)
 
@@ -220,7 +222,7 @@ plls2 = [Fsol(1), Fsol(2)]; %p de posicion
 disp('---------------------Red hibrida LLS2---------------------------------')
 disp('Distancia en metros desde antena de referencia ubicada en (0,0)')
 dis = sqrt(plls2(1)^2+plls2(2)^2)
-dcord = [Fsol(1), Fsol(2)]
+dcord = [abs(Fsol(1)), abs(Fsol(2))]
 disp('Angulo en grados')
 angle = atan(plls2(2)/plls2(1))*360/(2*pi)
 
@@ -250,7 +252,8 @@ for i = 1:4
     b3(i,1) = d(i)^2 - x(i)^2 - y(i)^2;
 
 
-    c3(i,i) = 4 * var(i)*d(i)^2; 
+    c3(i,i) = 4*var(i)*d(i)^2; 
+    
 end 
 
 sparse(A3);
@@ -263,13 +266,13 @@ Fsol = inv((A3'*inv(c3)*A3))*A3'*inv(c3)*b3; %%%%%%%%%Marca
 
 G = [1 0; 0 1; 1 1];
 
-tam = length (A3(:,1)');
-unos = ones ( tam , 1);
-K = diag([2.*A3(:,1), 2.*A3(:,2), unos]);
+K(1,1) = 2*Fsol(1);
+k(2,2) = 2*Fsol(2);
+k(3,3) = 1;
 
-h = [ A3(:,1).^2, A3(:,2).^2, A3(:,3).^2 ]';
+h = [ Fsol(1)^2 , Fsol(2)^2, Fsol(3) ]';
 
-Fi = K.*inv((A3'*inv(c3)*A3)).*K;
+Fi = K*inv((A3'*inv(c3)*A3))*K;
 %%%%%%%%%%%%%z me da NaN y mas de dos componentes, no encuentro el error, ayuda!!!!!
 z = inv((G'*inv(Fi)*G))*G'*inv(Fi)*h; %%%%%%Marca
 
@@ -278,9 +281,64 @@ z = inv((G'*inv(Fi)*G))*G'*inv(Fi)*h; %%%%%%Marca
 pwlls1 = [sign(Fsol(1)) * sqrt(abs( z(1)) ) , sign(Fsol(2))*sqrt(abs( z(2)) )];
 
 disp('---------------------Red hibrida WLLS1---------------------------------')
-disp('Distancia en metros desde antena de referencia ubicada en (0,0)')
+
 dis = sqrt(pwlls1(1)^2+pwlls1(2)^2)
-dcord = pwlls1
+dcord = [abs(pwlls1(1)),abs(pwlls1(2))]
 disp('Angulo en grados')
 angle = atan(pwlls1(2)/pwlls1(1))*360/(2*pi)
 
+
+
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%----------------------------------------Ultimo metodo,  WLLS2-----------------------------
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+x = [ 0 L 0 L ];
+y = [ 0 0 L L ];
+% r = ( 0 , 0);
+j=1;
+for i = 1:4
+    
+c4(i,j) = 4 * d(1)^2 * var(1)^2 + 3*var(1)^4 - var(1)^2 * (var(i)^2 + var(j)^2) + var(i)^2 * var(j)^2;
+        if ( i == j )
+            valor = 1;
+        else
+            valor = 0;
+        end 
+
+c4(i,j) = c4(i,j) - valor * ( 4 * d(i)^2 * var(i)^2 + 2 * var(i)^4);
+
+    j=j+1;
+end
+
+% La antena de referencia no hay que tomarla
+
+xr = 0; yr= 0;
+kr = [ xr^2 + yr^2 ];
+for i = 1:4
+    A4(i,1) = [ 2 * ( x(i) - xr ) ];
+    A4(i,2) = [ 2 * ( y(i) - yr )];
+    k(i,1) = [ x(i)^2 + y(i)^2 ];
+    b4(i,1) = d(1)^2 - d(i)^2 - kr - k(i,1);
+end 
+
+sparse(A4);
+sparse(b4);
+sparse(k);
+
+%Ahora deberia hacer Aii * p = bii donde p tiene dos componentes, x e y
+%que seran las cordenadas
+
+Fsol = inv((A4'*inv(c4)*A4))*A4'*inv(c4)*b4; 
+pwlls2 = [Fsol(1), Fsol(2)]; %p de posicion
+
+disp('---------------------Red hibrida WLLS2---------------------------------')
+disp('Distancia en metros desde antena de referencia ubicada en (0,0)')
+dis = sqrt(pwlls2(1)^2+pwlls2(2)^2)
+dcord = [abs(pwlls2(1)),abs(pwlls2(2))]
+disp('Angulo en grados')
+angle = atan(pwlls2(2)/pwlls2(1))*360/(2*pi)
