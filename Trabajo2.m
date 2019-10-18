@@ -51,8 +51,7 @@ pr = 9.81;
 d (4) = 10 ^ (( p0 - pr )/ ( 10 * gama )) * do;
 
 %---------------------------------------------------------------------------------------------
-    
-        
+
 
 % MATRIZ DE POSICION DE CADA ANTENA
 
@@ -77,6 +76,21 @@ end
 
 var = [ vartoa(1) vartoa(2) varrss(3) varrss(4) ];
 
+%------------------------------------------------------------------------------------------
+% Grafica del modelo fisico
+figure (1)
+title 'Red Hibrida'
+hold on
+
+colores = ['r' , 'g' , 'b', 'y'];
+
+for i=1:4
+    stem( x(i), y(i), colores(i))
+    circ = viscircles( [x(i),y(i)], d(1), 'color', colores(i));
+end
+
+
+%--------------------------------------------------------------------------------------------
 
 
 %$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
@@ -92,6 +106,9 @@ disp('------------------Red Hibrida LLS1----------------------------------')
     disp('Coordenadas:'); disp (dcord)
     disp('Angulo expresado en grados'); disp (ang)
 
+stem(dcord(1),dcord(2),'c')
+
+hold off
 
 
 disp('------------------Red Hibrida LLS2----------------------------------')
@@ -123,7 +140,7 @@ disp('------------------Red Hibrida WLLS2----------------------------------')
     disp('Coordenadas:'); disp (dcord)
     disp('Angulo expresado en grados'); disp (ang)
 
-disp('----------------------------------------------------------------------')
+disp(' ')
 
 %$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 %$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
@@ -139,6 +156,18 @@ d(3) = (3*10^8 / 1.0e+16 ) * ( Trtt3 - Ttat ) / 2;
 Trtt4 =  5e+08 ;; 
 d(4) = (3*10^8 / 1.0e+16 ) * ( Trtt4 - Ttat ) / 2;
 
+%-----------------------------------------------------------------------------
+figure (2)
+title 'Red no Hibrida'
+hold on
+colores = ['r' , 'g' , 'b', 'y'];
+
+for i=1:4
+    stem( x(i), y(i), colores(i))
+    circ = viscircles( [x(i),y(i)], d(1), 'color', colores(i));
+end
+%-----------------------------------------------------------------------------
+
 
 disp('------------------Red no Hibrida LLS1----------------------------------')
 [ dis, dcord, ang ] = LLS1 ( x , y , d ); 
@@ -146,6 +175,11 @@ disp('------------------Red no Hibrida LLS1----------------------------------')
     disp('Distancia:'); disp (dis)
     disp('Coordenadas:'); disp (dcord)
     disp('Angulo expresado en grados'); disp (ang)
+
+
+stem(dcord(1),dcord(2),'c')
+
+hold off
 
 xr = 0; yr= 0;
 
