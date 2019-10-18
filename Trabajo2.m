@@ -92,7 +92,7 @@ disp('------------------Red Hibrida LLS1----------------------------------')
     disp('Coordenadas:'); disp (dcord)
     disp('Angulo expresado en grados'); disp (ang)
 
-xr = 0; yr= 0;
+
 
 disp('------------------Red Hibrida LLS2----------------------------------')
 
@@ -184,4 +184,4 @@ disp('----------------------------------------------------------------------')
 warning ( 'on' )
 
 
-       
+ 
