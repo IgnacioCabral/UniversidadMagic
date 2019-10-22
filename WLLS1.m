@@ -1,5 +1,13 @@
 function [dis,dcord,ang]=WLLS1(var,x,y,d)
-%Defino las matrices necesarias
+
+% Variables de entrada:
+    % x e y son las coordenadas de las antenas.
+    % d es la distancai medida por las antenas.
+    % var es el vector de la varianza de las mediciones de las antenas.
+    
+% Funcion que aplica el metodo de la variable ficticia.
+
+    
 for i = 1:4
     A3(i,1) = [ -2 * x(i) ];
     A3(i,2) = [ -2 * y(i) ];

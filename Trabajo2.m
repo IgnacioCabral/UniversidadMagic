@@ -1,3 +1,12 @@
+% Este programa permite determinar la ubicacion de un agente, tanto en una 
+% red hibrida compuestas por antenas tipo TOA o RSS, como asi tambien en una
+% red no hibrida, compuesta solo por antenas tipo TOA. Esto se consigue a 
+% traves de dos metodos, uno de ellos se basa en la utilizacion de una
+% variable ficticia, mientras que el segundo se realiza a traves de la
+% utilizacion de una antena de referencia. A su vez, estos calculos se 
+% se llevan a cabo en dos oportunidades, en una de ellas se considera el 
+% error y la varianza.  
+
 clear all
 clc
 
@@ -29,9 +38,8 @@ d(2) = (3*10^8 / 1.0e+16 ) * ( Trtt2 - Ttat )/2;
 
 
 %-----------------------Rss1-------------------------------------------------------------------
-%
-% Ac� le voy a poner por el momento lo que dice el paper que m�s o menos da un resultado de 10m
-%pero habria que calcular un di por medio de la potencia
+%Valores tomados del paper
+
 do = 7.01;
 gama = 4.58;
 p0 = 10;
@@ -41,14 +49,14 @@ d (3) = 10 ^ (( p0 - pr )/ ( 10 * gama )) * do;
 
 
 %-----------------------Rss2------------------------------------------------------------------
-% Ac� le voy a poner por el momento lo que dice el paper que m�s o menos da un resultado de 10m
-%pero habr�a que calcular un di por medio de la potencia
+%Valores tomados del paper 
 
 do = 7.01;
 gama = 4.58;
 p0 = 10;
 pr = 9.81;
 d (4) = 10 ^ (( p0 - pr )/ ( 10 * gama )) * do;
+
 
 %---------------------------------------------------------------------------------------------
 
@@ -65,6 +73,7 @@ y = [ 0 0 L L ];
 xr = 0; yr= 0;
 
 % VARIANZA AL TOMAR MEDICIONES CON LAS ANTENAS
+
 eta = 2;
 SNR0 = 25;
 d0 = 1;
@@ -78,6 +87,7 @@ var = [ vartoa(1) vartoa(2) varrss(3) varrss(4) ];
 
 %------------------------------------------------------------------------------------------
 % Grafica del modelo fisico
+
 figure (1)
 title 'Red Hibrida'
 hold on
@@ -93,70 +103,65 @@ end
 %--------------------------------------------------------------------------------------------
 
 
-%$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
-%$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
-
-%   Calulos para una red 'HIBRIDA'
+% Calulos para una red 'HIBRIDA'
 
 disp('------------------Red Hibrida LLS1----------------------------------')
-[ dis, dcord, ang ] = LLS1(x,y,d); 
+
+[dis, dcord, ang] = LLS1(x,y,d); 
 
     
-    disp('Distancia:'); disp (dis)
-    disp('Coordenadas:'); disp (dcord)
-    disp('Angulo expresado en grados'); disp (ang)
+disp('Distancia:'); disp (dis)
+disp('Coordenadas:'); disp (dcord)
+disp('Angulo expresado en grados'); disp (ang)
 
 stem(dcord(1),dcord(2),'c')
 
 hold off
 
-
 disp('------------------Red Hibrida LLS2----------------------------------')
 
-[ dis, dcord, ang ] = LLS2(x,y,d,xr,yr);
+[dis, dcord, ang] = LLS2(x,y,d,xr,yr);
     
-    disp('Distancia en metros desde antena de referencia ubicada en (0,0):')
-    disp('Distancia:'); disp (dis)
-    disp('Coordenadas:'); disp (dcord)
-    disp('Angulo expresado en grados'); disp (ang)
+disp('Distancia en metros desde antena de referencia ubicada en (0,0):')
+disp('Distancia:'); disp (dis)
+disp('Coordenadas:'); disp (dcord)
+disp('Angulo expresado en grados'); disp (ang)
 
-    
+
 disp('------------------Red Hibrida WLLS1----------------------------------')
 
 [dis,dcord,ang]=WLLS1(var,x,y,d);    
           
-    
-    disp('Distancia:'); disp (dis)
-    disp('Coordenadas:'); disp (dcord)
-    disp('Angulo expresado en grados'); disp (ang)
+disp('Distancia:'); disp (dis)
+disp('Coordenadas:'); disp (dcord)
+disp('Angulo expresado en grados'); disp (ang)
 
 
 disp('------------------Red Hibrida WLLS2----------------------------------')
 
-[ dis , dcord , ang ] = WLLS2 ( x , y , d , var );
+[dis , dcord , ang] = WLLS2 ( x , y , d , var );
     
-    disp('Distancia en metros desde antena de referencia ubicada en (0,0):')
-    disp('Distancia:'); disp (dis)
-    disp('Coordenadas:'); disp (dcord)
-    disp('Angulo expresado en grados'); disp (ang)
+disp('Distancia en metros desde antena de referencia ubicada en (0,0):')
+disp('Distancia:'); disp (dis)
+disp('Coordenadas:'); disp (dcord)
+disp('Angulo expresado en grados'); disp (ang)
 
 disp(' ')
 
-%$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
-%$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+%--------------------------------------------------------------------------------------------
 
-%   Calulos para una red ' NO HIBRIDA'
+% Calulos para una red ' NO HIBRIDA'
 
-% Repetir el proceso para  ahora tener en cuenta 4 toa entonces remplazar las 2 que eran
-% rss por toa
+% Las 4 antenas son TOA
 
-Trtt3 = 5.01e+08 ;; 
+Trtt3 = 5.01e+08 ; 
 d(3) = (3*10^8 / 1.0e+16 ) * ( Trtt3 - Ttat ) / 2;
 
-Trtt4 =  5e+08 ;; 
+Trtt4 =  5e+08 ; 
 d(4) = (3*10^8 / 1.0e+16 ) * ( Trtt4 - Ttat ) / 2;
 
 %-----------------------------------------------------------------------------
+
 figure (2)
 title 'Red no Hibrida'
 hold on
@@ -166,16 +171,16 @@ for i=1:4
     stem( x(i), y(i), colores(i))
     circ = viscircles( [x(i),y(i)], d(1), 'color', colores(i));
 end
+
 %-----------------------------------------------------------------------------
 
-
 disp('------------------Red no Hibrida LLS1----------------------------------')
-[ dis, dcord, ang ] = LLS1 ( x , y , d ); 
 
-    disp('Distancia:'); disp (dis)
-    disp('Coordenadas:'); disp (dcord)
-    disp('Angulo expresado en grados'); disp (ang)
+[dis, dcord, ang] = LLS1 ( x , y , d ); 
 
+disp('Distancia:'); disp (dis)
+disp('Coordenadas:'); disp (dcord)
+disp('Angulo expresado en grados'); disp (ang)
 
 stem(dcord(1),dcord(2),'c')
 
@@ -185,33 +190,31 @@ xr = 0; yr= 0;
 
 disp('------------------Red no Hibrida LLS2----------------------------------')
 
-[ dis, dcord, ang ] = LLS2( x , y , d , xr , yr );
+[dis, dcord, ang] = LLS2( x , y , d , xr , yr );
 
-    
-    disp('Distancia en metros desde antena de referencia ubicada en (0,0):')
-    disp('Distancia:'); disp (dis)
-    disp('Coordenadas:'); disp (dcord)
-    disp('Angulo expresado en grados'); disp (ang)
+disp('Distancia en metros desde antena de referencia ubicada en (0,0):')
+disp('Distancia:'); disp (dis)
+disp('Coordenadas:'); disp (dcord)
+disp('Angulo expresado en grados'); disp (ang)
 
     
 disp('------------------Red no Hibrida WLLS1----------------------------------')
 
-[ dis , dcord , ang ] = WLLS1( vartoa , x ,y ,d );    
+[dis , dcord , ang] = WLLS1( vartoa , x ,y ,d );    
           
-
-    disp('Distancia:'); disp (dis)
-    disp('Coordenadas:'); disp (dcord)
-    disp('Angulo expresado en grados'); disp (ang)
+disp('Distancia:'); disp (dis)
+disp('Coordenadas:'); disp (dcord)
+disp('Angulo expresado en grados'); disp (ang)
 
 
 disp('------------------Red no Hibrida WLLS2----------------------------------')
 
-[ dis , dcord , ang ] = WLLS2 ( x , y , d , vartoa );
+[dis , dcord , ang] = WLLS2 ( x , y , d , vartoa );
 
-    disp('Distancia en metros desde antena de referencia ubicada en (0,0):')
-    disp('Distancia:'); disp (dis)
-    disp('Coordenadas:'); disp (dcord)
-    disp('Angulo expresado en grados'); disp (ang)
+disp('Distancia en metros desde antena de referencia ubicada en (0,0):')
+disp('Distancia:'); disp (dis)
+disp('Coordenadas:'); disp (dcord)
+disp('Angulo expresado en grados'); disp (ang)
 
 disp('----------------------------------------------------------------------')
 

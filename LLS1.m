@@ -1,14 +1,14 @@
 function [ dis, dcord, angle ] = LLS1(x,y,d)
 
-% variables de entrada
-        % x e y son las cordenadas de las antenas
-        % d seran las distancias medidas por las antenas
+% Variables de entrada:
+   % x e y son las cordenadas de las antenas.
+   % d seran las distancias medidas por las antenas.
 
-%Funcion que aplica el metodo de la variable ficticia
-%Esta creada para 4 antenas ubicadas en cuadrado respecto de cero
-%Es decir (0,0)...(L,L)
+% Funcion que aplica el metodo de la variable ficticia.
+% Esta creada para 4 antenas ubicadas en cuadrado respecto de cero
+% es decir (0,0)...(L,L).
 
-%Creacion de la matriz
+% Creacion de la matriz
 
     for i = 1:4
         A(i,1) = [ -2 * x(i) ];
@@ -20,8 +20,7 @@ function [ dis, dcord, angle ] = LLS1(x,y,d)
     sparse(A);
     sparse(b);
 
-%Aplico el metodo de la variable ficticia 
-
+% Aplico el metodo de la variable ficticia 
 
     Fsol = inv((A'*A))*A'*b; 
     plls1 = [Fsol(1), Fsol(2)];
