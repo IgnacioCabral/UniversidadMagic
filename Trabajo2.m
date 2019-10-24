@@ -17,7 +17,7 @@ warning ( 'off' )
 % Calculo de distancia por cada antena:
 % -------------------TOA1---------------------------------------------------------------------
 
-Trtt1 =  5e+08 ;          
+Trtt1 =  5.01e+08 ;          
 %Tiempo de ida y vuelta en la medicion de distancia
 
 Ttat =   2.85e+07 ;         
@@ -28,7 +28,7 @@ d(1) = (3*10^8 / 1.0e+16 ) * ( Trtt1 - Ttat )/2;
 
 %---------------------TOA2--------------------------------------------------------------------
 
-Trtt2 =  5e+08 ;         
+Trtt2 =  4.99e+08 ;         
 %Tiempo de ida y vuelta en la medicion de distancia
 
 Ttat =  2.8595e+07 ;       
@@ -154,7 +154,7 @@ disp(' ')
 
 % Las 4 antenas son TOA
 
-Trtt3 = 5.01e+08 ; 
+Trtt3 = 5e+08 ; 
 d(3) = (3*10^8 / 1.0e+16 ) * ( Trtt3 - Ttat ) / 2;
 
 Trtt4 =  5e+08 ; 
