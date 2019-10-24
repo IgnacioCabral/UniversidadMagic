@@ -1,11 +1,17 @@
-function [dis,dcord,ang]=WLLS1(var,x,y,d)
+function [ dis, dcord, ang ] = WLLS1( var, x, y, d )
+
+% Funcion que aplica el metodo de minimos cuadrdos ponderados con la 
+% utlizacion de una variable ficticia.
 
 % Variables de entrada:
     % x e y son las coordenadas de las antenas.
     % d es la distancai medida por las antenas.
     % var es el vector de la varianza de las mediciones de las antenas.
     
-% Funcion que aplica el metodo de la variable ficticia.
+% Variables de salida:
+    % dis es la distancia de de la antena al agente en cuestion.
+    % dcord son las coordenadas del agente.
+    % ang es el angulo del agente segun la referencia.
 
     
 for i = 1:4
@@ -24,7 +30,9 @@ sparse(b3);
 sparse(c3);
 
 Fsol = inv((A3'*inv(c3)*A3))*A3'*inv(c3)*b3; 
+
 %Defino variables auxiliares al calculo
+
 G = [1 0; 0 1; 1 1];
 
 K(1,1) = 2*Fsol(1);

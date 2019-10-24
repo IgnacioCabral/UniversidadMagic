@@ -1,13 +1,19 @@
 function [ dis , dcord , ang ] = WLLS2 ( x , y , d , var )
-%Algoritmo de localizacion WLLS-2
-%Se debe ingresar las posicionnes de las antenas "x" "y", la distancia "d"
-%del agente a las antenas y sus respectivas varianzas "var".
-%La funci�n devolver� un vector cuya componente:
-%1: la distancia de la antena al agente en cuesti�n
-%2: las coordenadas [ x y ] del agente
-%3: �ngulo del agente seg�n la referencia 
+
+% Funcion que aplica el metodo de minimos cuadrdos ponderados con la 
+% utlizacion de una antena de referencia.
+% Variables de entrada:
+    % x e y son las coordenadas de las antenas.
+    % d es la distancai medida por las antenas.
+    % var es el vector de la varianza de las mediciones de las antenas.
+    
+% Variables de salida:
+    % dis es la distancia de de la antena al agente en cuestion.
+    % dcord son las coordenadas del agente.
+    % ang es el angulo del agente segun la referencia.
 
 j=1;
+
 for i = 1:4
     
 c4(i,j) = 4 * d(1)^2 * var(1)^2 + 3*var(1)^4 - var(1)^2 * (var(i)^2 + var(j)^2) + var(i)^2 * var(j)^2;
@@ -16,10 +22,9 @@ j=j+1;
 
 end
 
-% La antena de referencia no hay que tomarla
-
 xr = 0; yr= 0;
 kr = [ xr^2 + yr^2 ];
+
 for i = 1:4
     A4(i,1) = [ 2 * ( x(i) - xr ) ];
     A4(i,2) = [ 2 * ( y(i) - yr )];
@@ -31,8 +36,6 @@ sparse(A4);
 sparse(b4);
 sparse(k);
 
-%Ahora deberia hacer Aii * p = bii donde p tiene dos componentes, x e y
-%que seran las cordenadas
 
 Fsol = inv((A4'*inv(c4)*A4))*A4'*inv(c4)*b4; 
 
